@@ -1,6 +1,8 @@
 <?php
 
 namespace Filemaker;
+require_once "FilemakerMemory.php";
+
 /**
  * A class for interacting with the FileMaker Data API.
  * @author Drew Chase <drew.chase@mardens.com>
@@ -9,7 +11,7 @@ namespace Filemaker;
 class FileMaker
 {
     private string $database;
-    private string $token;
+    private string|null $token;
     private string $table;
     const URL_BASE = "https://fm.mardens.com/fmi/data/vLatest";
 
@@ -32,26 +34,30 @@ class FileMaker
         // Initializes the token to null
         $this->token = null;
 
-
-        // Check if the token is saved in memory
-        if (FilemakerMemory::getInstance()->has($database)) {
-            // Set the token to the saved token
-            $this->token = FilemakerMemory::getInstance()->get($database);
-        }
-        if ($this->token == null || !$this->validateToken($this->token)) {
-            // Get the session token
-            $this->token = $this->getSessionToken(base64_encode($username . ":" . $password));
-            FilemakerMemory::getInstance()->save($database, $this->token);
-        }
+        $this->token = self::getSessionToken($database, $username, $password);
+        FilemakerMemory::getInstance()->save($database, $this->token);
     }
 
     /**
      * Gets a session token from the FileMaker Data API.
      */
-    private function getSessionToken(string $base64): string
+    private static function getSessionToken(string $database, string $username, string $password): string
     {
+
+        if (FilemakerMemory::getInstance()->has($database)) {
+            $token = FilemakerMemory::getInstance()->get($database);
+            if ($token != null && self::validateToken($database, $token)) {
+                return $token;
+            } else {
+                FilemakerMemory::getInstance()->delete($database);
+            }
+        }
+
         // Define the URL for the FileMaker Data API endpoint
-        $url = self::URL_BASE . "/databases/" . $this->database . "/sessions";
+        $url = self::URL_BASE . "/databases/" . $database . "/sessions";
+
+        // Encode the username and password as a base64 string
+        $base64 = base64_encode($username . ":" . $password);
 
         // Create a stream context for the HTTP request
         $context = stream_context_create(array(
@@ -80,8 +86,6 @@ class FileMaker
         // If the result is FALSE, an error occurred
         if ($result === FALSE) {
             // Output an error message
-            echo 'Error: Unable to get content';
-            // End the function
             return "";
         }
 
@@ -106,7 +110,7 @@ class FileMaker
         $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records?_offset=" . $start . "&_limit=" . $offset;
 
         // Create a stream context for the HTTP request.
-        return $this->createAStreamContextForTheHTTPRequest($url, "GET");
+        return $this->getAuthenticatedStreamResponse($url, "GET")["response"]["data"];
     }
 
     /**
@@ -125,7 +129,11 @@ class FileMaker
      */
     public function getRowNames(): array
     {
-        return $this->getRowNamesByExample($this->getRecords()[0]);
+        $records = $this->getRecords();
+        if (count($records) > 0) {
+            return $this->getRowNamesByExample($records[0]);
+        }
+        return [];
     }
 
     /**
@@ -148,7 +156,7 @@ class FileMaker
         }
 
         // Create a stream context for the HTTP request.
-        $result = $this->createAStreamContextForTheHTTPRequest($url, "POST", json_encode($content));
+        $result = $this->getAuthenticatedStreamResponse($url, "POST", json_encode($content));
 
         // Return the 'data' array from the response.
         $result = $result['response']['data'];
@@ -168,7 +176,7 @@ class FileMaker
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name, layout name, and record ID.
         $url = "https://fm.mardens.com/fmi/data/vLatest/databases/" . $this->database . "/layouts/$this->table/records/$id";
-        $result = $this->createAStreamContextForTheHTTPRequest($url, "PATCH", json_encode(["fieldData" => $fieldData]));
+        $result = $this->getAuthenticatedStreamResponse($url, "PATCH", json_encode(["fieldData" => $fieldData]));
         $record = $this->getRecordById($id);
 
         // Return the 'data' array from the response.
@@ -189,7 +197,7 @@ class FileMaker
         // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
         $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records/";
 
-        $result = $this->createAStreamContextForTheHTTPRequest($url, "POST", json_encode(["fieldData" => $fieldData]));
+        $result = $this->getAuthenticatedStreamResponse($url, "POST", json_encode(["fieldData" => $fieldData]));
 
         $recordId = $result["response"]["recordId"];
         $result = $this->getRecordById($recordId);
@@ -202,13 +210,13 @@ class FileMaker
      * @param int $id The ID of the record to get.
      * @return array The record.
      */
-    public function getRecordByID($id)
+    public function getRecordByID(int $id): array
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name, layout name, and record ID.
         $url = "https://fm.mardens.com/fmi/data/vLatest/databases/" . $this->database . "/layouts/$this->table/records/$id";
 
         // Create a stream context for the HTTP request.
-        return $this->createAStreamContextForTheHTTPRequest($url);
+        return $this->getAuthenticatedStreamResponse($url, "GET");
     }
 
     /**
@@ -221,7 +229,7 @@ class FileMaker
         // Define the URL for the FileMaker Data API endpoint, including the database name, layout name, and record ID.
         $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records/$id";
 
-        $response = $this->createAStreamContextForTheHTTPRequest($url, "DELETE");
+        $response = $this->getAuthenticatedStreamResponse($url, "DELETE");
         if ($response == []) return [];
 
         // Return the 'data' array from the response.
@@ -241,20 +249,34 @@ class FileMaker
     }
 
     /**
+     * Creates a stream context for authenticated HTTP requests.
+     *
+     * @param string $url The URL of the endpoint.
+     * @param string $method The HTTP method.
+     * @param string $content The HTTP body content. (default: "{}")
+     *
+     * @return mixed The response of the HTTP request.
+     */
+    private function getAuthenticatedStreamResponse(string $url, string $method, string $content = "{}"): mixed
+    {
+        return self::getStreamResponse($url, $method, "Bearer " . $this->token, $content);
+    }
+
+    /**
      * Creates a stream context for the HTTP request.
      *
      * @param string $url The URL to send the request to.
      * @param string $method The HTTP method to use (e.g., GET, POST).
      * @return mixed The response data.
      */
-    private function createAStreamContextForTheHTTPRequest(string $url, string $method, string $content = "{}"): mixed
+    private static function getStreamResponse(string $url, string $method, string $authorization, string $content = "{}"): mixed
     {
         $context = stream_context_create(array(
             'http' => array(
                 // Set the HTTP method to GET.
                 'method' => $method,
                 // Define the HTTP headers for the request, including the authorization token.
-                'header' => "Authorization: Bearer " . $this->token . "\r\n" .
+                'header' => "Authorization: " . $authorization . "\r\n" .
                     "User-Agent: PHP\r\n" .
                     "Content-Type: application/json\r\n",
                 // Set the HTTP body content to an empty JSON object.
@@ -274,21 +296,67 @@ class FileMaker
 
         // If the result is FALSE, an error occurred.
         if ($result === FALSE) {
-            // Output an error message.
-            echo 'Error: Unable to get content';
             // Return an empty array.
             return [];
         }
 
+        $result = json_decode($result, true);
+        $result["headers"] = $http_response_header;
+
         // Return the 'data' array from the response.
-        return json_decode($result, true);
+        return $result;
     }
 
 
-    private function validateToken(string $token)
+    /**
+     * Retrieves the list of databases accessible to the specified user.
+     *
+     * @param string $username The username.
+     * @param string $password The password.
+     * @return array The list of accessible databases.
+     */
+    public static function getDatabases(string $username, string $password): array
     {
-        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/";
-        $result = $this->createAStreamContextForTheHTTPRequest($url, "GET");
-        return $result["messages"][0]["message"] != "Invalid FileMaker Data API token (*)";
+        $url = self::URL_BASE . "/databases";
+        $result = self::getStreamResponse($url, "GET", "Basic " . base64_encode($username . ":" . $password));
+        $result = $result["response"]["databases"];
+
+        // map the databases to an array of names
+        return array_map(function ($database) {
+            return $database["name"];
+        }, $result);
+    }
+
+    public static function getLayouts(string $username, string $password, string $database): array
+    {
+        $url = self::URL_BASE . "/databases/" . $database . "/layouts/";
+        $result = self::getStreamResponse($url, "GET", "Bearer " . self::getSessionToken($database, $username, $password));
+        $result = $result["response"]["layouts"];
+
+        // map the databases to an array of names
+        return array_map(function ($layout) {
+            return $layout["name"];
+        }, $result);
+    }
+
+
+    /**
+     * Validates the provided token against the specified database.
+     *
+     * @param string $database The name of the database.
+     * @param string $token The token to be validated.
+     *
+     * @return bool Returns true if the token is valid, false otherwise.
+     */
+    public static function validateToken(string $database, string $token): bool
+    {
+        $url = self::URL_BASE . "/databases/" . $database . "/layouts/";
+        $result = self::getStreamResponse($url, "GET", "Bearer " . $token);
+
+        // This grabs the first element of the headers array and splits it into an array of words and gets the second word.
+        // Example of the first headers is: HTTP/1.1 401 Unauthorized
+        $status = intval(explode(" ", $result["headers"][0])[1]);
+
+        return $status == 200;
     }
 }
