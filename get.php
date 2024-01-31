@@ -185,43 +185,69 @@ $app->get("/databases/{database}/layouts/{layout}/records", function (Request $r
     return $response;
 });
 
+// Define a route for getting a specific record from a specific database and layout
 $app->get("/databases/{database}/layouts/{layout}/records/{recordId}", function (Request $request, Response $response, $args) {
+    // Parse the authentication headers from the request
     $authentication = parseAuthHeaders($request);
+
+    // Check if the parsed authentication is valid
     if (!$authentication) {
+        // Write the error response if authentication is invalid
         $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
+        // Set the response content type to JSON
         header("Content-Type: application/json");
         return $response;
     }
+
+    // Extract the credentials from the parsed authentication
     $username = $authentication["username"];
     $password = $authentication["password"];
+
+    // Extract the database and layout from the request parameters
     $database = $args["database"];
     $layout = $args["layout"];
+
+    // Try to parse the recordID in an integer format
     try {
         $recordId = intval($args["recordId"]);
     } catch (Exception $e) {
+        // If the recordId is not an integer, write an error and stop execution
         $response->getBody()->write(json_encode(["error" => "Invalid record id"]));
         header("Content-Type: application/json");
         return $response;
     }
 
+    // Create a new FileMaker instance with the provided credentials, database, and layout
     $fm = new FileMaker($username, $password, $database, $layout);
+    // Fetch the requested record from the database
     $record = $fm->getRecordByID($recordId);
+
+    // Write the fetched record to the response body
     $response->getBody()->write(json_encode($record));
+    // Set the response type to JSON
     header("Content-Type: application/json");
+    // Return the response
     return $response;
 });
 
+// Define a route for getting active authentication sessions
 $app->get("/auth/active", function (Request $request, Response $response, $args) {
+
+    // Try to fetch the list of active sessions
     try {
         $list = FilemakerMemory::getInstance()->list();
+        // Write the list of active sessions to the response body
         $response->getBody()->write(json_encode($list));
+        // Set the response content type to JSON
         header("Content-Type: application/json");
     } catch (Exception $e) {
+        // If there is a problem fetching the list, set the response code to 400
         header("Content-Type: application/json");
         http_response_code(400);
+        // Write the error message to the response body
         $response->getBody()->write(json_encode(["error" => "Unable to fetch user list", "message" => $e->getMessage()]));
     }
-
+    // Return the response
     return $response;
 });
 
