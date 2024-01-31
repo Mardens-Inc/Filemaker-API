@@ -46,11 +46,11 @@ class FilemakerMemory
     /**
      * Returns the token for the given database.
      * @param string $database The database to retrieve the token for.
-     * @return string The token for the given database.
+     * @return string|null The token for the given database, or null if the token could not be found.
      */
-    public function get(string $database): string
+    public function get(string $database): ?string
     {
-        return $this->memory[$database];
+        return $this->memory[$database] ?? null;
     }
 
     /**
@@ -70,7 +70,14 @@ class FilemakerMemory
      */
     public function delete(string $database): void
     {
-        unset($this->memory[$database]);
+        if ($this->has($database)) {
+            unset($this->memory[$database]);
+        }
+    }
+
+    public function list(): array
+    {
+        return $this->memory;
     }
 
 
