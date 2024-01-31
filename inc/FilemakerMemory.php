@@ -1,7 +1,9 @@
 <?php
 
-
 namespace Filemaker;
+
+require_once "Connections.inc.php";
+
 /**
  * Class FilemakerMemory
  *
@@ -11,25 +13,17 @@ namespace Filemaker;
  */
 class FilemakerMemory
 {
-    private static FilemakerMemory $instance;
-    private array $memory;
-
-    protected function __construct()
-    {
-        $this->memory = [];
-    }
 
     /**
-     * Returns the singleton instance of this class.
-     *
-     * @return FilemakerMemory The singleton instance of this class.
+     * Initializes the memory table in the database.
      */
-    public static function getInstance(): FilemakerMemory
+    public static function init(): void
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new FilemakerMemory();
-        }
-        return self::$instance;
+        $conn = Connections::getConnection();
+        $stmt = $conn->prepare("CREATE TABLE IF NOT EXISTS `memory` (`name` VARCHAR(255) PRIMARY KEY, `token` VARCHAR(4096))");
+        $stmt->execute();
+        $stmt->close();
+        $conn->close();
     }
 
     /**
@@ -37,9 +31,14 @@ class FilemakerMemory
      * @param string $token The token to save.
      * @return void
      */
-    public function save(string $database, string $token): void
+    public static function save(string $database, string $token): void
     {
-        $this->memory[$database] = $token;
+        $conn = Connections::getConnection();
+        $stmt = $conn->prepare("INSERT INTO `memory` (`name`, `token`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `token` = ?");
+        $stmt->bind_param("sss", $database, $token, $token);
+        $stmt->execute();
+        $stmt->close();
+        $conn->close();
     }
 
 
@@ -48,9 +47,21 @@ class FilemakerMemory
      * @param string $database The database to retrieve the token for.
      * @return string|null The token for the given database, or null if the token could not be found.
      */
-    public function get(string $database): ?string
+    public static function get(string $database): ?string
     {
-        return $this->memory[$database] ?? null;
+        $conn = Connections::getConnection();
+        $stmt = $conn->prepare("SELECT `token` FROM `memory` WHERE name = ?");
+        $stmt->bind_param("s", $database);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        $conn->close();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row["token"];
+        }
+
+        return null;
     }
 
     /**
@@ -58,9 +69,16 @@ class FilemakerMemory
      * @param string $database The database to check.
      * @return bool Whether the given database has a token saved.
      */
-    public function has(string $database): bool
+    public static function has(string $database): bool
     {
-        return isset($this->memory[$database]);
+        $conn = Connections::getConnection();
+        $stmt = $conn->prepare("SELECT * FROM `memory` WHERE name = ?");
+        $stmt->bind_param("s", $database);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        $conn->close();
+        return $result->num_rows > 0;
     }
 
     /**
@@ -68,16 +86,29 @@ class FilemakerMemory
      * @param string $database The database to delete the token for.
      * @return void
      */
-    public function delete(string $database): void
+    public static function delete(string $database): void
     {
-        if ($this->has($database)) {
-            unset($this->memory[$database]);
-        }
+        $conn = Connections::getConnection();
+        $stmt = $conn->prepare("DELETE FROM `memory` WHERE name = ?");
+        $stmt->bind_param("s", $database);
+        $stmt->execute();
+        $stmt->close();
+        $conn->close();
     }
 
-    public function list(): array
+    public static function list(): array
     {
-        return $this->memory;
+        $conn = Connections::getConnection();
+        $stmt = $conn->prepare("SELECT * FROM `memory`");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        $conn->close();
+        $databases = [];
+        while ($row = $result->fetch_assoc()) {
+            $databases[] = $row["name"];
+        }
+        return $databases;
     }
 
 
