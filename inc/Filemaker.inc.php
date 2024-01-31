@@ -34,8 +34,10 @@ class FileMaker
         // Initializes the token to null
         $this->token = null;
 
+        FilemakerMemory::init();
+
         $this->token = self::getSessionToken($database, $username, $password);
-        FilemakerMemory::getInstance()->save($database, $this->token);
+        FilemakerMemory::save($database, $this->token);
     }
 
     /**
@@ -44,14 +46,15 @@ class FileMaker
     private static function getSessionToken(string $database, string $username, string $password): string
     {
 
-        if (FilemakerMemory::getInstance()->has($database)) {
-            $token = FilemakerMemory::getInstance()->get($database);
+        if (FilemakerMemory::has($database)) {
+            $token = FilemakerMemory::get($database);
             if ($token != null && self::validateToken($database, $token)) {
                 return $token;
             } else {
-                FilemakerMemory::getInstance()->delete($database);
+                FilemakerMemory::delete($database);
             }
         }
+
 
         // Define the URL for the FileMaker Data API endpoint
         $url = self::URL_BASE . "/databases/" . $database . "/sessions";
@@ -146,13 +149,13 @@ class FileMaker
     public function Search(array $fields, array $sort = [], bool $ascending = true): array
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
-        $url = "https://fm.mardens.com/fmi/data/vLatest/databases/" . $this->database . "/layouts/$this->table/_find";
+        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/_find";
 
         // Set the HTTP body content to a JSON object containing the query and sort parameters.
         $content = [];
         $content["query"] = [$fields];
-        foreach ($sort as $sort) {
-            $content["sort"] += ["fieldName" => $sort, "sortOrder" => $ascending ? "ascend" : "descend"];
+        foreach ($sort as $s) {
+            $content["sort"] += ["fieldName" => $s, "sortOrder" => $ascending ? "ascend" : "descend"];
         }
 
         // Create a stream context for the HTTP request.
@@ -175,7 +178,7 @@ class FileMaker
     public function updateRecord(int $id, array $fieldData): array
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name, layout name, and record ID.
-        $url = "https://fm.mardens.com/fmi/data/vLatest/databases/" . $this->database . "/layouts/$this->table/records/$id";
+        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records/$id";
         $result = $this->getAuthenticatedStreamResponse($url, "PATCH", json_encode(["fieldData" => $fieldData]));
         $record = $this->getRecordById($id);
 
@@ -213,7 +216,7 @@ class FileMaker
     public function getRecordByID(int $id): array
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name, layout name, and record ID.
-        $url = "https://fm.mardens.com/fmi/data/vLatest/databases/" . $this->database . "/layouts/$this->table/records/$id";
+        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records/$id";
 
         // Create a stream context for the HTTP request.
         return $this->getAuthenticatedStreamResponse($url, "GET");
@@ -234,6 +237,20 @@ class FileMaker
 
         // Return the 'data' array from the response.
         return ["success" => true];
+    }
+
+    /**
+     * Deletes the specified database.
+     *
+     * @param string $database The name of the database to be deleted.
+     * @param string $username The username for authentication.
+     * @param string $password The password for authentication.
+     * @return void
+     */
+    public static function deleteDatabase(string $database, string $username, string $password): void
+    {
+        $url = self::URL_BASE . "/databases/" . self::encodeParameter($database);
+        self::getStreamResponse($url, "DELETE", "Bearer " . self::getSessionToken($database, $username, $password));
     }
 
     /**
@@ -300,12 +317,8 @@ class FileMaker
             // Return an empty array.
             return [];
         }
-
-        $result = json_decode($result, true);
-//        $result["headers"] = $http_response_header;
-
         // Return the 'data' array from the response.
-        return $result;
+        return json_decode($result, true);
     }
 
 
@@ -356,13 +369,8 @@ class FileMaker
 
         $url = self::URL_BASE . "/databases/" . $database . "/layouts/";
         $result = self::getStreamResponse($url, "GET", "Bearer " . $token);
-        $result["headers"] = $http_response_header;
 
-        // This grabs the first element of the headers array and splits it into an array of words and gets the second word.
-        // Example of the first headers is: HTTP/1.1 401 Unauthorized
-        $status = intval(explode(" ", $result["headers"][0])[1]);
-
-        return $status == 200;
+        return intval($result["messages"][0]["code"]) !== 952;
     }
 
     /**
