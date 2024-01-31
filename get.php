@@ -1,4 +1,6 @@
 <?php
+
+
 use Filemaker\FilemakerMemory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -8,6 +10,8 @@ use Filemaker\FileMaker;
 require_once './vendor/autoload.php';
 require_once './inc/Filemaker.inc.php';
 require_once './inc/FilemakerMemory.php';
+
+FilemakerMemory::init();
 
 // Initialize a new Slim App
 $app = AppFactory::create();
@@ -26,23 +30,21 @@ $app->setBasePath("/fmutil");
 // It returns a JavaScript file when accessed
 $app->get("/", function (Request $request, Response $response, $args) {
     $response->getBody()->write(file_get_contents("js/Filemaker.js"));
-    header("Content-Type: text/javascript");
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "text/javascript");
 });
 
 // Route for /js/minified endpoint
 // It returns a minified JavaScript when accessed
 $app->get("/js/minified", function (Request $request, Response $response, $args) {
     $response->getBody()->write(file_get_contents("js/Filemaker.min.js"));
-    header("Content-Type: text/javascript");
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "text/javascript");
 });
 
 // Route for /js/time endpoint
 // It returns the last modified time of the JavaScript file
 $app->get("/js/time", function (Request $request, Response $response, $args) {
     $response->getBody()->write(filemtime("js/Filemaker.js") . "");
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "text/plain");
 });
 
 // Route for /databases endpoint
@@ -51,15 +53,13 @@ $app->get("/databases", function (Request $request, Response $response, $args) {
     $authentication = parseAuthHeaders($request);
     if (!$authentication) {
         $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
-        header("Content-Type: application/json");
-        return $response;
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
     $username = $authentication["username"];
     $password = $authentication["password"];
     $databases = Filemaker::getDatabases($username, $password);
     $response->getBody()->write(json_encode($databases));
-    header("Content-Type: application/json");
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
 });
 
 // Define a GET route for fetching layouts from specified database
@@ -72,9 +72,7 @@ $app->get("/databases/{database}/layouts", function (Request $request, Response 
     if (!$authentication) {
         // Writing error message to the response
         $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
-        // Specifying the Content-Type of the response
-        header("Content-Type: application/json");
-        return $response;
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
 
     // If authentication is valid, extract username and password
@@ -90,11 +88,8 @@ $app->get("/databases/{database}/layouts", function (Request $request, Response 
     // Write the retrieved layouts to the response body in JSON format
     $response->getBody()->write(json_encode($layouts));
 
-    // Set the content type of the response
-    header("Content-Type: application/json");
-
     // Return the response
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
 });
 
 // Starts a GET route
@@ -104,8 +99,7 @@ $app->get("/databases/{database}/layouts/{layout}/fields", function (Request $re
     $authentication = parseAuthHeaders($request);
     if (!$authentication) {
         $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
-        header("Content-Type: application/json");
-        return $response;
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
 
     // Extracts username and password from the parsed authentication
@@ -125,11 +119,8 @@ $app->get("/databases/{database}/layouts/{layout}/fields", function (Request $re
     // Writes the $fields array as a JSON string to the response's body
     $response->getBody()->write(json_encode($fields));
 
-    // Sets the Content-Type of the response to application/json
-    header("Content-Type: application/json");
-
     // Returns the response
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
 });
 
 // This block of code sets up a route for getting records from a specified database and layout
@@ -141,8 +132,7 @@ $app->get("/databases/{database}/layouts/{layout}/records", function (Request $r
     $authentication = parseAuthHeaders($request);
     if (!$authentication) {
         $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
-        header("Content-Type: application/json");
-        return $response;
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
 
     // Extract username and password from the parsed authentication data
@@ -179,10 +169,9 @@ $app->get("/databases/{database}/layouts/{layout}/records", function (Request $r
 
     // Write the records to the response body as a JSON formatted string
     $response->getBody()->write(json_encode($records));
-    header("Content-Type: application/json");
 
     // Return the completed Response object
-    return $response;
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
 });
 
 // Define a route for getting a specific record from a specific database and layout
@@ -194,9 +183,7 @@ $app->get("/databases/{database}/layouts/{layout}/records/{recordId}", function 
     if (!$authentication) {
         // Write the error response if authentication is invalid
         $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
-        // Set the response content type to JSON
-        header("Content-Type: application/json");
-        return $response;
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
 
     // Extract the credentials from the parsed authentication
@@ -235,20 +222,16 @@ $app->get("/auth/active", function (Request $request, Response $response, $args)
 
     // Try to fetch the list of active sessions
     try {
-        $list = FilemakerMemory::getInstance()->list();
+        $list = FilemakerMemory::list();
         // Write the list of active sessions to the response body
         $response->getBody()->write(json_encode($list));
-        // Set the response content type to JSON
-        header("Content-Type: application/json");
+        // Return the response
+        return $response->withStatus(200)->withHeader("Content-Type", "application/json");
     } catch (Exception $e) {
-        // If there is a problem fetching the list, set the response code to 400
-        header("Content-Type: application/json");
-        http_response_code(400);
         // Write the error message to the response body
         $response->getBody()->write(json_encode(["error" => "Unable to fetch user list", "message" => $e->getMessage()]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
-    // Return the response
-    return $response;
 });
 
 
