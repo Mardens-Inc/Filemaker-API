@@ -234,6 +234,30 @@ $app->get("/auth/active", function (Request $request, Response $response, $args)
     }
 });
 
+$app->get("/databases/{database}/layouts/{layout}/search", function (Request $request, Response $response, $args) {
+
+
+    $authentication = parseAuthHeaders($request);
+    if (!$authentication) {
+        $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
+    }
+
+    $database = $args["database"];
+    $layout = $args["layout"];
+    $username = $authentication["username"];
+    $password = $authentication["password"];
+    $fm = new FileMaker($username, $password, $database, $layout);
+
+    $params = $request->getQueryParams();
+    $query = $params["query"] ?? "";
+    $ascending = $params["ascending"] ?? true;
+    $records = $fm->search($query, $ascending);
+
+    $response->getBody()->write(json_encode($records));
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
+});
+
 
 $app->run();
 
