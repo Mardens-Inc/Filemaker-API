@@ -28,9 +28,9 @@ class FileMaker
     {
         // Encode the username and password as a base64 string this is used to get the session token
         // Set the database name
-        $this->database = $database;
+        $this->database = self::encodeParameter($database);
         // Set the table name
-        $this->table = $table;
+        $this->table = self::encodeParameter($table);
         // Initializes the token to null
         $this->token = null;
 
@@ -100,14 +100,14 @@ class FileMaker
     /**
      * Gets the records from the database.
      * @param int $start The starting record number. (This value is 1-based.)
-     * @param int $offset The number of records to get.
+     * @param int $limit The number of records to get.
      * @return array The records.
      */
-    public function getRecords(int $start = 1, int $offset = 10): array
+    public function getRecords(int $start = 1, int $limit = 10): array
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
         // The _offset and _limit query parameters are used for pagination.
-        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records?_offset=" . $start . "&_limit=" . $offset;
+        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records?_offset=" . $start . "&_limit=" . $limit;
 
         // Create a stream context for the HTTP request.
         return $this->getAuthenticatedStreamResponse($url, "GET")["response"]["data"];
@@ -271,6 +271,7 @@ class FileMaker
      */
     private static function getStreamResponse(string $url, string $method, string $authorization, string $content = "{}"): mixed
     {
+        $url = self::encodeParameter($url);
         $context = stream_context_create(array(
             'http' => array(
                 // Set the HTTP method to GET.
@@ -301,7 +302,7 @@ class FileMaker
         }
 
         $result = json_decode($result, true);
-        $result["headers"] = $http_response_header;
+//        $result["headers"] = $http_response_header;
 
         // Return the 'data' array from the response.
         return $result;
@@ -329,6 +330,7 @@ class FileMaker
 
     public static function getLayouts(string $username, string $password, string $database): array
     {
+        $database = self::encodeParameter($database);
         $url = self::URL_BASE . "/databases/" . $database . "/layouts/";
         $result = self::getStreamResponse($url, "GET", "Bearer " . self::getSessionToken($database, $username, $password));
         $result = $result["response"]["layouts"];
@@ -350,13 +352,26 @@ class FileMaker
      */
     public static function validateToken(string $database, string $token): bool
     {
+        $database = self::encodeParameter($database);
+
         $url = self::URL_BASE . "/databases/" . $database . "/layouts/";
         $result = self::getStreamResponse($url, "GET", "Bearer " . $token);
+        $result["headers"] = $http_response_header;
 
         // This grabs the first element of the headers array and splits it into an array of words and gets the second word.
         // Example of the first headers is: HTTP/1.1 401 Unauthorized
         $status = intval(explode(" ", $result["headers"][0])[1]);
 
         return $status == 200;
+    }
+
+    /**
+     * Encodes a parameter string by replacing spaces with "%20".
+     * @param string $parameter The parameter string to encode.
+     * @return string The encoded parameter string.
+     */
+    private static function encodeParameter(string $parameter): string
+    {
+        return str_replace(" ", "%20", $parameter);
     }
 }
