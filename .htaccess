@@ -1,0 +1,13 @@
+RewriteEngine on
+
+RewriteCond %{REQUEST_METHOD} GET [NC]
+RewriteCond %{REQUEST_URI} !/get\.php$ [NC]
+RewriteRule ^.*$ /get.php [L]
+
+RewriteCond %{REQUEST_METHOD} POST [NC]
+RewriteCond %{REQUEST_URI} !/post\.php$ [NC]
+RewriteRule ^.*$ /post.php [L]
+
+RewriteCond %{REQUEST_METHOD} DELETE [NC]
+RewriteCond %{REQUEST_URI} !/delete\.php$ [NC]
+RewriteRule ^.*$ /delete.php [L]
