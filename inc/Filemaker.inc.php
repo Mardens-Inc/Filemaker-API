@@ -117,14 +117,20 @@ class FileMaker
     }
 
     /**
-     * Gets the field names for the specified record.
-     * @param array $record A record example.
-     * @return array The field names.
+     * Returns the names of fields in the given record excluding the ones starting with 'g_' (global fields)
+     *
+     * @param array $record An example record with 'fieldData' element containing field names as keys
+     * @return array An array of field names
      */
     public function getRowNamesByExample(array $record): array
     {
-        // Return the 'data' array from the response.
-        return array_keys($record['fieldData']);
+        $fields = [];
+        foreach (array_keys($record['fieldData']) as $field) {
+            if (!str_starts_with($field, "g_")) {
+                $fields[] = $field;
+            }
+        }
+        return $fields;
     }
 
     /**
@@ -146,27 +152,37 @@ class FileMaker
      * @param bool $ascending Whether to sort in ascending order.
      * @return array The matching records.
      */
-    public function Search(array $fields, array $sort = [], bool $ascending = true): array
+    public function advancedSearch(array $fields, array $sort = [], bool $ascending = true): array
     {
         // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
         $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/_find";
 
         // Set the HTTP body content to a JSON object containing the query and sort parameters.
         $content = [];
-        $content["query"] = [$fields];
+        $content["query"] = $fields;
         foreach ($sort as $s) {
             $content["sort"] += ["fieldName" => $s, "sortOrder" => $ascending ? "ascend" : "descend"];
         }
-
+//        die(json_encode($content));
         // Create a stream context for the HTTP request.
         $result = $this->getAuthenticatedStreamResponse($url, "POST", json_encode($content));
 
         // Return the 'data' array from the response.
-        $result = $result['response']['data'];
+        $result = @$result['response']['data'];
         if ($result == null) return [];
 
         // Return the 'data' array from the response.
         return $result;
+    }
+
+    public function search(string $query, bool $ascending = true): array
+    {
+        $rows = $this->getRowNames();
+        $fields = [];
+        foreach ($rows as $row) {
+            $fields[] = [$row => $query];
+        }
+        return $this->advancedSearch($fields, [], $ascending);
     }
 
     /**
@@ -193,8 +209,8 @@ class FileMaker
      */
     public function addRecord(array $fieldData): array
     {
-        if (count($this->Search($fieldData)) > 0) {
-            $record = $this->Search($fieldData)[0]["recordId"];
+        if (count($this->advancedSearch($fieldData)) > 0) {
+            $record = $this->advancedSearch($fieldData)[0]["recordId"];
             return $this->updateRecord($record['recordId'], $fieldData);
         }
         // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
