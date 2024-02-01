@@ -1,1 +1,562 @@
-{}
+{
+	"info": {
+		"_postman_id": "8faaef9e-22a0-45ae-9ac9-ef5c2566291d",
+		"name": "Custom Filemaker API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16833182"
+	},
+	"item": [
+		{
+			"name": "Get Javascript",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Databases",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Authentication-Options",
+						"value": "{\"username\": \"{{username}}\",    \"password\": \"{{password}}\" }",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/databases",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"databases"
+					]
+				},
+				"description": "This endpoint makes an HTTP GET request to retrieve a list of databases from the specified URL. The response will be in JSON format with a status code of 200. However, the example response provided is an empty array."
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Authentication-Options",
+								"value": "{\"username\": \"admin\",    \"password\": \"password\" }",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lib.mardens.com/fmutil/databases",
+							"protocol": "https",
+							"host": [
+								"lib",
+								"mardens",
+								"com"
+							],
+							"path": [
+								"fmutil",
+								"databases"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 30 Jan 2024 19:41:43 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    \"Database 1\",\n    \"Database 2\",\n    \"Database 3\"\n]"
+				}
+			]
+		},
+		{
+			"name": "Get Database Layouts",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Authentication-Options",
+						"value": "{\"username\": \"{{username}}\",    \"password\": \"{{password}}\" }",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/databases/{{database}}/layouts",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"databases",
+						"{{database}}",
+						"layouts"
+					]
+				},
+				"description": "This endpoint makes an HTTP GET request to retrieve the layouts for the \"AMZ\" database. The response will be in JSON format with an array of layout names."
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Authentication-Options",
+								"value": "{\"username\": \"admin\",    \"password\": \"pwd\" }",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lib.mardens.com/fmutil/databases/DB 1/layouts",
+							"protocol": "https",
+							"host": [
+								"lib",
+								"mardens",
+								"com"
+							],
+							"path": [
+								"fmutil",
+								"databases",
+								"DB 1",
+								"layouts"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 30 Jan 2024 19:40:27 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    \"Table 1\",\n    \"Table 2\",\n    \"Table 3\"\n]"
+				}
+			]
+		},
+		{
+			"name": "Get Database Layout Fields",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Authentication-Options",
+						"value": "{\"username\": \"{{username}}\",    \"password\": \"{{password}}\" }",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/databases/{{database}}/layouts/{{layout}}/fields",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"databases",
+						"{{database}}",
+						"layouts",
+						"{{layout}}",
+						"fields"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Authentication-Options",
+								"value": "{\"username\": \"admin\",    \"password\": \"pwd\" }",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lib.mardens.com/fmutil/databases/DB 1/layouts/Table 1/fields",
+							"protocol": "https",
+							"host": [
+								"lib",
+								"mardens",
+								"com"
+							],
+							"path": [
+								"fmutil",
+								"databases",
+								"DB 1",
+								"layouts",
+								"Table 1",
+								"fields"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 30 Jan 2024 20:46:50 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    \"Col 1\",\n    \"Col 2\",\n    \"Col 3\"\n]"
+				}
+			]
+		},
+		{
+			"name": "Search Database",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Authentication-Options",
+						"value": "{\"username\": \"{{username}}\",    \"password\": \"{{password}}\" }",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/databases/{{database}}/layouts/{{layout}}/search?query=santa",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"databases",
+						"{{database}}",
+						"layouts",
+						"{{layout}}",
+						"search"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "santa"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Database Layout Records",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Authentication-Options",
+						"value": "{\"username\": \"{{username}}\",    \"password\": \"{{password}}\" }",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/databases/{{database}}/layouts/{{layout}}/records?limit=1&offset=0",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"databases",
+						"{{database}}",
+						"layouts",
+						"{{layout}}",
+						"records"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				},
+				"description": "This HTTP GET request retrieves records from the \"Gen\" layout of the \"AMZ\" database with a limit of 1 record and an offset of 0. The response will be in JSON format and will include an array of records, each containing field data, portal data, record ID, and modification ID.\n\nThe response will have a status code of 200, and the content type will be \"application/json\"."
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Authentication-Options",
+								"value": "{\"username\": \"uname\",    \"password\": \"pwd\" }",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://lib.mardens.com/fmutil/databases/AMZ/layouts/Gen/records?limit=1&offset=0",
+							"protocol": "https",
+							"host": [
+								"lib",
+								"mardens",
+								"com"
+							],
+							"path": [
+								"fmutil",
+								"databases",
+								"AMZ",
+								"layouts",
+								"Gen",
+								"records"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 31 Jan 2024 14:27:18 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Strict-Transport-Security",
+							"value": "max-age=31536000"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"fieldData\": {\n            \"Col 1\": \"\",\n            \"Col 2\": \"\",\n            \"Col 3\": \"\"\n        },\n        \"portalData\": [],\n        \"recordId\": \"0\",\n        \"modId\": \"0\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Get Database Layout Record by ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Authentication-Options",
+						"value": "{\"username\": \"{{username}}\",    \"password\": \"{{password}}\" }",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/databases/{{database}}/layouts/{{layout}}/records/{{record}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"databases",
+						"{{database}}",
+						"layouts",
+						"{{layout}}",
+						"records",
+						"{{record}}"
+					]
+				},
+				"description": "This HTTP GET request retrieves records from the \"Gen\" layout of the \"AMZ\" database with a limit of 1 record and an offset of 0. The response will be in JSON format and will include an array of records, each containing field data, portal data, record ID, and modification ID.\n\nThe response will have a status code of 200, and the content type will be \"application/json\"."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Active Users",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/auth/active",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth",
+						"active"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://lib.mardens.com/fmutil",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "uname",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "pwd",
+			"type": "string"
+		},
+		{
+			"key": "database",
+			"value": "DB 1",
+			"type": "string"
+		},
+		{
+			"key": "layout",
+			"value": "Table 1",
+			"type": "string"
+		},
+		{
+			"key": "record",
+			"value": "0",
+			"type": "string"
+		}
+	]
+}
