@@ -5,10 +5,10 @@ A middleware for FileMaker Server 16+ Data API with a javascript library for the
 # Table of Contents
 
 1. [Requirements](#requirements)
-    - [FileMaker Server 16+](#filemaker-server-16)
-    - [Composer](#composer)
-    - [PHP 8.1 or higher](#php-81-or-higher)
-    - [Apache or Nginx](#apache-or-nginx)
+    - [FileMaker Server 16+](https://www.filemaker.com/products/filemaker-server/)
+    - [Composer](https://getcomposer.org/)
+    - [PHP 8.1 or higher](https://www.php.net/downloads.php)
+    - [Apache](https://httpd.apache.org/) or [Nginx](https://www.nginx.com/)
 2. [Installation](#installation)
     - [Clone Repository](#clone-repository)
     - [Install Composer Dependencies](#install-composer-dependencies)
