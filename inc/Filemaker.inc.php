@@ -209,10 +209,6 @@ class FileMaker
      */
     public function addRecord(array $fieldData): array
     {
-        if (count($this->advancedSearch($fieldData)) > 0) {
-            $record = $this->advancedSearch($fieldData)[0]["recordId"];
-            return $this->updateRecord($record['recordId'], $fieldData);
-        }
         // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
         $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records/";
 
