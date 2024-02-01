@@ -20,6 +20,9 @@ A middleware for FileMaker Server 16+ Data API with a javascript library for the
 4. [NGINX Configuration](#nginx-configuration)
     - [Server block configuration](#server-block-configuration)
     - [Reloading nginx](#reloading-nginx)
+5. Libraries
+    - [PHP Library](php-library.md)
+    - [Javascript Library](js-library.md)
 
 
 
