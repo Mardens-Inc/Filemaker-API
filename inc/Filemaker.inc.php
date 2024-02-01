@@ -232,7 +232,7 @@ class FileMaker
 
         // Create a stream context for the HTTP request.
         $result = $this->getAuthenticatedStreamResponse($url, "GET");
-        if(count($result["response"]) == 0) return [];
+        if (count($result["response"]) == 0) return [];
         // Return the 'data' array from the response.
         return $result["response"]["data"][0];
     }
