@@ -1,344 +1,143 @@
-# Filemaker Library API Documentation
+# Filemaker-JS-Library
 
-This is a basic documentation on how to use the Filemaker JavaScript library.
+Filemaker-JS-Library is a powerful, robust, and easy-to-use library to interact with Filemaker databases using Filemaker Data API.
+
+## Table of Contents
 - [Installation](#installation)
-    - [Easy (Recommended)](#easy-recommended)
-    - [Manual (CORS)](#manual-cors)
-- [Classes](#classes)
-    - [FilemakerRecord](#filemakerrecord)
-        - [constructor()](#constructor-filemakerrecord)
-        - [static fromJSON(json)](#static-fromjsonjson-filemakerrecord)
-    - [Filemaker](#filemaker)
-        - [constructor(url, username, password, database, layout)](#constructorurl-username-password-database-layout-filemaker)
-        - [withUrl(url)](#withurlurl-filemaker)
-        - [withUsername(username)](#withusernameusername-filemaker)
-        - [withPassword(password)](#withpasswordpassword-filemaker)
-        - [withDatabase(database)](#withdatabasedatabase-filemaker)
-        - [withLayout(layout)](#withlayoutlayout-filemaker)
-        - [getActiveSessions()](#getactivesessions-filemaker)
-        - [search(query)](#searchquery-filemaker)
-        - [getDatabases()](#getdatabases-filemaker)
-        - [getLayouts()](#getlayouts-filemaker)
-        - [getRecords(limit, offset)](#getrecordslimit-offset-filemaker)
-        - [getRecord(id)](#getrecordid-filemaker)
-        - [getRows()](#getrows-filemaker)
-        - [updateRecord(id, record, addIfMissing)](#updaterecordid-record-addifmissing-filemaker)
-        - [deleteRecord(id)](#deleterecordid-filemaker)
-        - [deleteAllRecords()](#deleteallrecords-filemaker)
-        - [addRecord(record)](#addrecordrecord-filemaker)
-- [Note](#note)
-- [Example Usage](#example-usage)
-    - [Instance Creation](#instance-creation)
-    - [Configuring Parameter](#configuring-parameter)
-    - [API Calls](#api-calls)
-
-# Installation
-Follow the webserver installation on the [main README](README.MD) then include the following script in your HTML file.
+- [Initialization](#initialization)
+- [Instance Methods](#instance-methods)
+  - [Setting URL](#1-setting-url)
+  - [Setting Username](#2-setting-username)
+  - [Setting Password](#3-setting-password)
+  - [Setting Database](#4-setting-database)
+  - [Setting Layout](#5-setting-layout)
+  - [Fetching Active Sessions](#6-fetching-active-sessions)
+  - [Searching Records](#7-searching-records)
+  - [Getting Database List](#8-getting-database-list)
+  - [Retrieving Layouts](#9-retrieving-layouts)
+  - [Fetching Records](#10-fetching-records)
+  - [Getting a Single Record](#11-getting-a-single-record)
+  - [Retrieving Rows from a Layout](#12-retrieving-rows-from-a-layout)
+  - [Deleting a Record](#13-deleting-a-record)
+  - [Updating a Record](#14-updating-a-record)
+  - [Adding a Record](#15-adding-a-record)
+- [Error Handling](#error-handling)
 
 
-## Easy (Recommended)
-```html
-<script type="module" src="script.js"></script>
-```
-then add this to your `script.js` file:
+
+## Installation
+
+Include an installation step here according to your package manager.
+
+## Initialization
 
 ```javascript
-import { Filemaker, FilemakerRecords } from 'https://filemaker-api-server.local/';
+import Filemaker from 'Filemaker-JS-Library';
+
+const filemaker = new Filemaker('url', 'username', 'password', 'database', 'layout');
 ```
 
-## Manual (CORS)
-This is only recommended if you are unable to use the easy method due to CORS restrictions and are unable to bypass them.
+## Instance Methods
 
-Add this to the top of your index.php file:
-```php
-<?php
+### 1. Setting URL
+```javascript
+filemaker.withUrl('newUrl');
+```
 
-/**
- * Fetches libraries from the Marden's website and saves it to the server.
- * This is done to fix the issue of the libraries being blocked by CORS.
- * This script will be called everytime the page is loaded.
- * Is that a good Idea? Probably not. But it works.
- */
+### 2. Setting Username
+```javascript
+filemaker.withUsername('newUsername');
+```
 
-$libs = [
-    "filemaker.js" => "https://filemaker-api-server.local/",
-    //... any other libraries
-];
+### 3. Setting Password
+```javascript
+filemaker.withPassword('newPassword');
+```
 
-foreach ($libs as $file => $url) {
-    $file = $_SERVER['DOCUMENT_ROOT'] . "/assets/lib/$file";
+### 4. Setting Database
+```javascript
+filemaker.withDatabase('newDatabase');
+```
 
-    // Get last modified time of the url
-    // Ignore SSL errors
-    $lastModifiedUrl = constructUrl($url, "time");
-    $last_modified = retrieveUrlContents($lastModifiedUrl, "text/plaintext");
-    $last_modified = intval($last_modified);
+### 5. Setting Layout
+```javascript
+filemaker.withLayout('newLayout');
+```
 
-    if (!file_exists($file) || $last_modified >= filemtime($file)) {
-        // Download the file
-        $fileUrl = constructUrl($url);
-        file_put_contents($file, retrieveUrlContents($fileUrl, "text/javascript"));
-    }
+### 6. Fetching Active Sessions
+```ecmascript 6
+filemaker.getActiveSessions();
+```
+
+### 7. Searching Records
+```ecmascript 6
+filemaker.search('query');
+```
+
+### 8. Getting Database List
+```ecmascript 6
+filemaker.getDatabases();
+```
+
+### 9. Retrieving Layouts
+```ecmascript 6
+filemaker.getLayouts();
+```
+
+### 10. Fetching Records
+
+```javascript
+filemaker.getRecords();
+```
+
+Use this method to retrieve records from the FileMaker database. It returns a Promise object representing the array of records. Be sure to use await keyword or then method to get the result.
+
+### 11. Getting a Single Record
+
+```javascript
+filemaker.getRecord('recordId');
+```
+
+Use this method to retrieve a single record with the given recordId from the FileMaker database. It returns a Promise object representing the record. Be sure to use await keyword or then method to get the result.
+
+### 12. Retrieving Rows from a Layout
+
+```javascript
+filemaker.getRows('layout');
+```
+
+This method fetches rows from a given layout. It returns a Promise object representing the array of rows. Be sure to use await keyword or then method to fetch the rows.
+
+### 13. Deleting a Record
+
+```javascript
+filemaker.delete('recordId');
+```
+
+Use this method to delete a record with a given recordId. It returns a Promise object that resolves to the status of the operation. Be sure to use await keyword or then method to perform the operation.
+
+### 14. Updating a Record
+
+```javascript
+filemaker.update('recordId', {fieldToUpdate: 'newValue'});
+```
+
+This method updates a record with the given recordId using the provided update fields. It returns a Promise object representing the status of the operation. Be sure to use await keyword or then method to perform the operation.
+
+### 15. Adding a Record
+
+```javascript
+filemaker.addRecord({fieldName: 'fieldValue'});
+```
+
+## Error Handling
+
+This library throws errors when required fields are not set or network operations fail. Make sure to use try/catch blocks.
+
+```ecmascript 6
+try {
+    const records = await filemaker.search('query');
+} catch(error) {
+    console.log(error.message);
 }
-
-/**
- * Retrieves the contents of a URL using the given URL and header content type.
- *
- * @param string $url The URL to retrieve the contents from.
- * @param string $headerContentType The header content type to be set in the request.
- *
- * @return bool|string The retrieved contents of the URL as a string, or false if unsuccessful.
- */
-function retrieveUrlContents(string $url, string $headerContentType): bool|string
-{
-    return file_get_contents($url, false, stream_context_create([
-        'http' => [
-            'method' => 'GET',
-            'header' => "Content-Type: $headerContentType"
-        ], 'ssl' => [
-            'verify_peer' => false,
-            'verify_peer_name' => false,
-        ],
-    ]));
-}
-
-/**
- * Constructs a URL using the given base URL and endpoint.
- *
- * @param string $baseUrl The base URL of the website.
- * @param string|null $endpoint The optional endpoint to append to the base URL. Default is null.
- *
- * @return string The constructed URL string.
- */
-function constructUrl(string $baseUrl, string $endpoint = null): string
-{
-    return $endpoint ? $baseUrl . "/?{$endpoint}" : $baseUrl . "/";
-}
-
-?>
 ```
-
-# Classes
-
-## `FilemakerRecord`
-
-### `constructor()`
-
-- Instantiates a new FilemakerRecord
-
-### `static fromJSON(json)`
-
-- Creates a new FilemakerRecord from a JSON object
-- Argument:
-    - `json`: An object representing the FilemakerRecord
-
-## `Filemaker`
-### `constructor(url, username, password, database, layout)`
-
-- Instantiates a new Filemaker object
-- Arguments:
-    - `url`: The URL of the Filemaker server
-    - `username`: The username to use to connect to the server
-    - `password`: The password to use to connect to the server
-    - `database`: The database to use
-    - `layout`: The layout/table to use
-
-
-### `withUrl(url)`
-
-- Sets the server URL for the instance
-- Argument:
-    - `url`: The URL of the server to be set
-
-### `withUsername(username)`
-
-- Sets the username for the instance
-- Argument:
-    - `username`: The username to be set
-
-### `withPassword(password)`
-
-- Sets the password for the instance
-- Argument:
-    - `password`: The password to be set
-
-### `withDatabase(database)`
-
-- Sets the database for the instance
-- Argument:
-    - `database`: The name of the database to be set
-
-### `withLayout(layout)`
-
-- Sets the layout for the instance
-- Argument:
-    - `layout`: The layout to be set for the instance
-
-### `getActiveSessions()`
-
-- Fetches a list of databases with active sessions
-- Returns a Promise that resolves with a JSON object representing array of active sessions
-
-### `search(query)`
-
-- Searches the database for records matching the query
-- Argument:
-    - `query`: The query string to search for
-- Returns a Promise that resolves with an array of `FilemakerRecord` objects that match the query
-
-### `getDatabases()`
-- Fetches a list of databases from the server
-- Returns a Promise that resolves with a JSON object representing an array of databases
-
-### `getLayouts()`
-- Fetches a list of layouts from the specified database
-- Returns a Promise that resolves with a JSON object representing an array of layouts
-
-### `getRecords(limit, offset)`
-
-- Fetches records from Filemaker database
-- Arguments:
-    - `limit`: The maximum number of records to fetch. Default is 10
-    - `offset`: The offset position to start fetching records. Default is 0
-- Returns a Promise that resolves with an array of `FilemakerRecord` objects
-
-### `getRecord(id)`
-
-- Retrieves a record with the specified ID
-- Argument:
-    - `id`: The ID of the record to retrieve
-- Returns a Promise that resolves with the retrieved `FilemakerRecord`
-
-### `getRows()`
-- Fetches rows from the specified database and layout
-- Returns a Promise that resolves with a JSON object representing an array of rows
-
-### `updateRecord(id, record, addIfMissing)`
-
-- Updates a record in the database
-- Arguments:
-    - `id`: The ID of the record to update
-    - `record`: The updated record data
-    - `addIfMissing`: If true, adds the record if it does not already exist. Default is false
-- Returns a Promise that resolves with the updated `FilemakerRecord`
-
-### `deleteRecord(id)`
-
-- Deletes a record with the specified ID
-- Argument:
-    - `id`: The ID of the record to delete
-
-### `deleteAllRecords()`
-
-- Deletes all records from the specified layout
-- Returns a void Promise that resolves when the deletion is successful
-
-### `addRecord(record)`
-
-- Adds a record to the database
-- Argument:
-    - `record`: The `FilemakerRecord` to add
-- Returns a Promise that resolves with the added `FilemakerRecord`
-
-# Note
-
-All methods are `async` and may throw errors. Always handle rejections when using these methods.
-
-
-# Example Usage
-
-## Instance Creation
-
-Creating an instance of class `Filemaker` and `FilemakerRecord`:
-
-```javascript
-let record = new FilemakerRecord();
-
-const fmk = new Filemaker(url, username, password, database, layout);
-```
-
-## Configuring Parameter
-
-Setting URL, username, password, database, and layout to the object:
-
-```javascript
-fmk.withUrl(url);
-fmk.withUsername(username);
-fmk.withPassword(password);
-fmk.withDatabase(database);
-fmk.withLayout(layout);
-```
-
-## API Calls
-
-Various API calls you can make with the `Filemaker` and `FilemakerRecord` class:
-
-Fetching Active Sessions:
-
-```javascript
-let activeSessions = await fmk.getActiveSessions();
-```
-
-Search the database:
-
-```javascript
-let searchResults = await fmk.search(query);
-```
-
-Retrieve databases:
-
-```javascript
-let dbList = await fmk.getDatabases();
-```
-
-Get layouts:
-
-```javascript
-let layouts = await fmk.getLayouts();
-```
-
-Fetch records:
-
-```javascript
-let records = await fmk.getRecords(limit, offset);
-```
-
-Fetching a specific record by ID:
-
-```javascript
-let record = await fmk.getRecord(id);
-```
-
-Get rows:
-
-```javascript
-let rows = await fmk.getRows();
-```
-
-Update (and possibly add) a record:
-
-```javascript
-let updatedRecord = await fmk.updateRecord(id, record, addIfMissing);
-```
-
-Delete a specific record:
-
-```javascript
-await fmk.deleteRecord(id);
-```
-
-Delete all records:
-
-```javascript
-await fmk.deleteAllRecords();
-```
-
-Adding a record:
-
-```javascript
-let newRecord = await fmk.addRecord(record);
-```
-
-Please note that all of these examples are asynchronous operations. Remember to handle promises correctly to avoid unhandled promise rejection warnings or errors.
-
-
