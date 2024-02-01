@@ -63,9 +63,11 @@ export default class Filemaker {
      * Sets the URL for the current instance.
      *
      * @param {string} url - The URL to be set.
+     * @return {Filemaker} - The current instance of the Filemaker class.
      */
     withUrl(url) {
         this.url = url;
+        return this;
     }
 
     /**
@@ -73,38 +75,44 @@ export default class Filemaker {
      *
      * @param {string} username - The username to set.
      *
-     * @return {void}
+     * @return {Filemaker} - The current instance of the Filemaker class.
      */
     withUsername(username) {
         this.username = username;
+        return this;
     }
 
     /**
      * Sets the password for the user.
      *
      * @param {string} password - The password to be set.
-     * @return {void}
+     * @return {Filemaker}
      */
     withPassword(password) {
         this.password = password;
+        return this;
     }
 
     /**
      * Sets the database for the current instance.
      *
      * @param {string} database - The database name to be set.
+     * @return {Filemaker} - The current instance with the database set.
      */
     withDatabase(database) {
         this.database = database;
+        return this;
     }
 
     /**
      * Sets the layout for the component.
      *
      * @param {string} layout - The layout to be set for the component.
+     * @returns {Filemaker} - Returns the current instance of the component.
      */
     withLayout(layout) {
         this.layout = layout;
+        return this;
     }
 
 
@@ -370,7 +378,7 @@ export default class Filemaker {
      * @throws {Error} - If the required fields (username, password, database, and layout) are not set.
      * @throws {Error} - If the deletion of records fails.
      */
-    async deleteAllRecords(){
+    async deleteAllRecords() {
         if (this.username === "" && this.password === "" && this.database === "" && this.layout === "") {
             throw new Error("Required fields are not set. Please set the username, password, database, and layout before making a request.");
         }
