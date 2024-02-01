@@ -106,7 +106,15 @@ This library provides an application-wide place to store and manage database tok
 
 ## Configuration
 
-Make a copy of the [example.env](/example.env) file and rename it to `.env`. Then, fill in the required values.
+Make a copy of the [example.env](/example.env) file and rename it to `.env`. Then, fill in the required values.  
+Here's an example:
+```ini
+DB_HOST=localhost
+DB_DATABASE=apps
+DB_USERNAME=root
+DB_PASSWORD=password123
+```
+
 
 ## Initialization
 
