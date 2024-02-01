@@ -14,13 +14,7 @@ A middleware for FileMaker Server 16+ Data API with a javascript library for the
     - [Install Composer Dependencies](#install-composer-dependencies)
     - [Configure FileMaker Server](#configure-filemaker-server)
 3. [Apache Configuration](#apache-configuration)
-    - [Required modules](#required-modules)
-    - [VirtualHost configuration](#virtualhost-configuration)
-    - [.htaccess configuration](#htaccess-configuration)
-    - [Reloading apache](#reloading-apache)
 4. [NGINX Configuration](#nginx-configuration)
-    - [Server block configuration](#server-block-configuration)
-    - [Reloading nginx](#reloading-nginx)
 5. Libraries
     - [PHP Library](inc/README.md)
     - [Javascript Library](js/README.md)
