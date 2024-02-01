@@ -231,7 +231,10 @@ class FileMaker
         $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records/$id";
 
         // Create a stream context for the HTTP request.
-        return $this->getAuthenticatedStreamResponse($url, "GET");
+        $result = $this->getAuthenticatedStreamResponse($url, "GET");
+        if(count($result["response"]) == 0) return [];
+        // Return the 'data' array from the response.
+        return $result["response"]["data"][0];
     }
 
     /**
