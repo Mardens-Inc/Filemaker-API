@@ -65,22 +65,22 @@ filemaker.withLayout('newLayout');
 ```
 
 ### 6. Fetching Active Sessions
-```ecmascript 6
+```javascript
 filemaker.getActiveSessions();
 ```
 
 ### 7. Searching Records
-```ecmascript 6
+```javascript
 filemaker.search('query');
 ```
 
 ### 8. Getting Database List
-```ecmascript 6
+```javascript
 filemaker.getDatabases();
 ```
 
 ### 9. Retrieving Layouts
-```ecmascript 6
+```javascript
 filemaker.getLayouts();
 ```
 
@@ -134,7 +134,7 @@ filemaker.addRecord({fieldName: 'fieldValue'});
 
 This library throws errors when required fields are not set or network operations fail. Make sure to use try/catch blocks.
 
-```ecmascript 6
+```javascript
 try {
     const records = await filemaker.search('query');
 } catch(error) {
