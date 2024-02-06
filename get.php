@@ -30,6 +30,15 @@ $app->setBasePath("/fmutil");
 // Route for the root endpoint
 // It returns a JavaScript file when accessed
 $app->get("/", function (Request $request, Response $response, $args) {
+    $params = $request->getQueryParams();
+    if (isset($params["minified"])) {
+        $response->getBody()->write(file_get_contents("js/Filemaker.min.js"));
+        return $response->withStatus(200)->withHeader("Content-Type", "text/javascript");
+    }
+    if (isset($params["time"])) {
+        $response->getBody()->write(filemtime("js/Filemaker.js") . "");
+        return $response->withStatus(200)->withHeader("Content-Type", "text/plain");
+    }
     $response->getBody()->write(file_get_contents("js/Filemaker.js"));
     return $response->withStatus(200)->withHeader("Content-Type", "text/javascript");
 });
@@ -149,20 +158,32 @@ $app->get("/databases/{database}/layouts/{layout}/records", function (Request $r
     // Create an instance of the FileMaker class with provided credentials and layout details
     $fm = new FileMaker($username, $password, $database, $layout);
 
-    // If 'limit' param is set in the query, convert it to integer otherwise default it to 100
-    if (isset($params["limit"])) {
-        $limit = intval($params["limit"]);
-    } else {
-        $limit = 100;
+    try {
+
+        // If 'limit' param is set in the query, convert it to integer otherwise default it to 100
+        if (isset($params["limit"])) {
+            $limit = intval($params["limit"]);
+        } else {
+            $limit = 100;
+        }
+    } catch (Exception $e) {
+        $response->getBody()->write(json_encode(["error" => "Invalid limit value", "message" => $e->getMessage()]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
 
-    // If 'offset' query param is set, convert it to integer. If it is less than or equal to 0, set it to 1
-    // Otherwise, if 'offset' is not set, set it to 1
-    if (isset($params["offset"])) {
-        $offset = intval($params["offset"]);
-        $offset = $offset <= 0 ? 1 : $offset;
-    } else {
-        $offset = 1;
+    try {
+
+        // If 'offset' query param is set, convert it to integer. If it is less than or equal to 0, set it to 1
+        // Otherwise, if 'offset' is not set, set it to 1
+        if (isset($params["offset"])) {
+            $offset = intval($params["offset"]);
+            $offset = $offset <= 0 ? 1 : $offset;
+        } else {
+            $offset = 1;
+        }
+    } catch (Exception $e) {
+        $response->getBody()->write(json_encode(["error" => "Invalid offset value", "message" => $e->getMessage()]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
     }
 
     // Fetch records using the FileMaker instance's 'getRecords' function
@@ -172,6 +193,37 @@ $app->get("/databases/{database}/layouts/{layout}/records", function (Request $r
     $response->getBody()->write(json_encode($records));
 
     // Return the completed Response object
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
+});
+
+$app->get("/databases/{database}/layouts/{layout}/records/all", function (Request $request, Response $response, $args) {
+    $authentication = parseAuthHeaders($request);
+    if (!$authentication) {
+        $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
+    }
+    $username = $authentication["username"];
+    $password = $authentication["password"];
+    $database = $args["database"];
+    $layout = $args["layout"];
+    $fm = new FileMaker($username, $password, $database, $layout);
+    $records = $fm->getAllRecords();
+    $response->getBody()->write(json_encode($records));
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
+});
+$app->get("/databases/{database}/layouts/{layout}/records/count", function (Request $request, Response $response, $args) {
+    $authentication = parseAuthHeaders($request);
+    if (!$authentication) {
+        $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
+    }
+    $username = $authentication["username"];
+    $password = $authentication["password"];
+    $database = $args["database"];
+    $layout = $args["layout"];
+    $fm = new FileMaker($username, $password, $database, $layout);
+    $count = $fm->getNumberOfRecords();
+    $response->getBody()->write(json_encode(["count" => $count]));
     return $response->withStatus(200)->withHeader("Content-Type", "application/json");
 });
 
