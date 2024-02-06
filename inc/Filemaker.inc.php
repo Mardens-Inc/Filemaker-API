@@ -117,6 +117,33 @@ class FileMaker
     }
 
     /**
+     * Retrieves all records from the data source.
+     *
+     * @return array The array of all records.
+     */
+    public function getAllRecords(): array
+    {
+        $count = $this->getNumberOfRecords();
+        return $this->getRecords(1, $count);
+    }
+
+
+    /**
+     * Retrieves the total number of records in the database.
+     *
+     * @return int The total number of records.
+     */
+    public function getNumberOfRecords(): int
+    {
+        // Define the URL for the FileMaker Data API endpoint, including the database name and layout name.
+        $url = self::URL_BASE . "/databases/" . $this->database . "/layouts/$this->table/records";
+
+        // Create a stream context for the HTTP request.
+        $result = @$this->getAuthenticatedStreamResponse($url, "GET");
+        return $result["response"]["dataInfo"]["totalRecordCount"];
+    }
+
+    /**
      * Returns the names of fields in the given record excluding the ones starting with 'g_' (global fields)
      *
      * @param array $record An example record with 'fieldData' element containing field names as keys
