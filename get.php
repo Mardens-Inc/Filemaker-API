@@ -12,6 +12,9 @@ require_once './inc/Filemaker.inc.php';
 require_once './inc/FilemakerMemory.php';
 require_once './restUtility.php';
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: X-Requested-With");
+
 FilemakerMemory::init();
 
 // Initialize a new Slim App
@@ -41,6 +44,10 @@ $app->get("/", function (Request $request, Response $response, $args) {
     }
     $response->getBody()->write(file_get_contents("js/Filemaker.js"));
     return $response->withStatus(200)->withHeader("Content-Type", "text/javascript");
+});
+
+$app->get(".js", function (Request $request, Response $response, $args) {
+    return $response->withStatus(301)->withHeader("Location", "/");
 });
 
 // Route for /js/minified endpoint
