@@ -10,6 +10,8 @@ require_once './vendor/autoload.php';
 require_once './inc/Filemaker.inc.php';
 require_once './inc/FilemakerMemory.php';
 require_once './restUtility.php';
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: X-Requested-With");
 
 
 // Initialize a new Slim App
@@ -45,18 +47,16 @@ $app->post("/databases/{database}/layouts/{layout}/records[/{id}]", function (Re
     $data = $request->getParsedBody();
     $params = $request->getQueryParams();
 
-    // Decode the request data from JSON into an associative array
-    // Handle potential decoding errors and respond with an error message
-    try {
-        $data = json_decode($data, true);
-    } catch (Exception $e) {
-        $response->getBody()->write(json_encode(["error" => "Invalid data format"]));
-        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
-    }
+//    // Decode the request data from JSON into an associative array
+//    // Handle potential decoding errors and respond with an error message
+//    try {
+//        $data = json_decode($data, true);
+//    } catch (Exception $e) {
+//    }
 
     // Create a new FileMaker instance using the provided authentication details
     $fm = new Filemaker($username, $password, $database, $layout);
-    $id = $args["id"];
+    $id = @$args["id"] ?? null;
 
     // If there's an ID provided in the request
     if (isset($id)) {
@@ -86,8 +86,33 @@ $app->post("/databases/{database}/layouts/{layout}/records[/{id}]", function (Re
 
     // Return the modified or created record in the response body
     $response->getBody()->write(json_encode($record));
-    return $response->withHeader('Content-Type', 'application/json');
+    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
 })->setName("updateOrCreateRecord");
+
+
+$app->post("/databases/{database}/layouts/{layout}/search", function (Request $request, Response $response, $args) {
+    $authentication = parseAuthHeaders($request);
+    if (!$authentication) {
+        $response->getBody()->write(json_encode(["error" => "Invalid authentication options"]));
+        return $response->withStatus(400)->withHeader("Content-Type", "application/json");
+    }
+
+    $database = $args["database"];
+    $layout = $args["layout"];
+    $username = $authentication["username"];
+    $password = $authentication["password"];
+    $fm = new FileMaker($username, $password, $database, $layout);
+
+    $body = $request->getParsedBody();
+    $fields = $body["fields"] ?? [];
+    $sort = $body["sort"] ?? [];
+    $ascending = @$body["sort"] ?? true;
+    $records = $fm->advancedSearch($fields, $sort, $ascending);
+
+
+    $response->getBody()->write(json_encode($records));
+    return $response->withStatus(200)->withHeader("Content-Type", "application/json");
+});
 
 
 $app->run();
