@@ -10,6 +10,8 @@ require_once './vendor/autoload.php';
 require_once './inc/Filemaker.inc.php';
 require_once './inc/FilemakerMemory.php';
 require_once './restUtility.php';
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: X-Requested-With");
 
 FilemakerMemory::init();
 
