@@ -42,6 +42,7 @@ class FileMaker
 
     /**
      * Gets a session token from the FileMaker Data API.
+     * @throws \Exception
      */
     private static function getSessionToken(string $database, string $username, string $password): string
     {
@@ -91,12 +92,14 @@ class FileMaker
             // Output an error message
             return "";
         }
-
         // Decode the JSON response into an associative array
         $resultArray = json_decode($result, true);
 
-        // Extract the token from the response array
-        return $resultArray['response']['token'];
+        if (isset($resultArray["response"]["token"]))
+            // Extract the token from the response array
+            return $resultArray['response']['token'];
+        else
+            throw new \Exception("Failed to get token from FileMaker Data API");
     }
 
 
@@ -194,6 +197,7 @@ class FileMaker
         // Create a stream context for the HTTP request.
         $result = $this->getAuthenticatedStreamResponse($url, "POST", json_encode($content));
 
+
         // Return the 'data' array from the response.
         $result = @$result['response']['data'];
         if ($result == null) return [];
@@ -241,7 +245,11 @@ class FileMaker
 
         $result = $this->getAuthenticatedStreamResponse($url, "POST", json_encode(["fieldData" => $fieldData]));
 
-        $recordId = $result["response"]["recordId"];
+        // add delay to allow the record to be added to the database
+//        sleep(1);
+
+        $recordId = @$result["response"]["recordId"] ?? null;
+        if ($recordId == null) return ["success" => false, "result" => $result];
         $result = $this->getRecordById($recordId);
 
         return ["success" => true, "result" => $result];
