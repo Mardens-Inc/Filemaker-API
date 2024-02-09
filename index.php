@@ -1,6 +1,8 @@
 <?php
 header("Content-Type: text/html");
 http_response_code(500);
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: X-Requested-With");
 ?>
 
 <!doctype html>
