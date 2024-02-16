@@ -27,6 +27,14 @@ $app->addErrorMiddleware(true, true, true);
 // Sets the base path for the application
 $app->setBasePath("/fmutil");
 
+$app->post("/credentials", function (Request $request, Response $response, $args) {
+    $body = $request->getParsedBody();
+    $username = $body["username"];
+    $password = $body["password"];
+    $database = $body["database"];
+    return $response->withStatus(FileMaker::validateCredentials($username, $password, $database) ? 200 : 401);
+});
+
 // Define a new route for POST requests to /databases/{database}/layouts/{layout}/records[/{id}]
 $app->post("/databases/{database}/layouts/{layout}/records[/{id}]", function (Request $request, Response $response, $args) {
 
