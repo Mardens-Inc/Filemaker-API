@@ -469,4 +469,28 @@ export default class Filemaker {
         }
     }
 
+    /**
+     * Validates the given credentials by sending a request to the server. If the credentials are valid, the username, password, and database are set.
+     *
+     * @param {string} username - The username to validate.
+     * @param {string} password - The password to validate.
+     * @param {string} database - The database to validate.
+     *
+     * @throws {Error} - If username, password, or database are missing.
+     *
+     * @returns {Promise<boolean>} - True if the credentials are valid, false otherwise.
+     */
+    async validateCredentials(username, password, database) {
+        if (username === "" || password === "" || database === "") throw new Error("Username, password, and database are required fields");
+        const body = JSON.stringify({username, password, database});
+        const response = await fetch(`${this.url}/fmutil/credentials`, {method: "POST", body});
+        if (response.ok) {
+            this.username = username;
+            this.password = password;
+            this.database = database;
+            return true;
+        }
+        return false;
+    }
+
 }
