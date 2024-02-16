@@ -94,12 +94,29 @@ class FileMaker
         }
         // Decode the JSON response into an associative array
         $resultArray = json_decode($result, true);
-
         if (isset($resultArray["response"]["token"]))
             // Extract the token from the response array
             return $resultArray['response']['token'];
         else
             throw new \Exception("Failed to get token from FileMaker Data API");
+    }
+
+    /**
+     * Validates the given credentials for the specified database.
+     *
+     * @param string $username The username.
+     * @param string $password The password.
+     * @param string $database The name of the database.
+     * @return bool True if the credentials are valid, false otherwise.
+     */
+    public static function validateCredentials(string $username, string $password, string $database): bool
+    {
+        try{
+            self::getSessionToken($database, $username, $password);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
 
