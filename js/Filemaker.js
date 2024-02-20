@@ -478,19 +478,24 @@ export default class Filemaker {
      *
      * @throws {Error} - If username, password, or database are missing.
      *
-     * @returns {Promise<boolean>} - True if the credentials are valid, false otherwise.
+     * @returns {Promise<{success: boolean, error}>} - True if the credentials are valid, false otherwise.
      */
     async validateCredentials(username, password, database) {
         if (username === "" || password === "" || database === "") throw new Error("Username, password, and database are required fields");
         const body = JSON.stringify({username, password, database});
-        const response = await fetch(`${this.url}/credentials`, {method: "POST", body});
-        if (response.ok) {
-            this.username = username;
-            this.password = password;
-            this.database = database;
-            return true;
+        try {
+
+            const response = await fetch(`${this.url}/credentials`, {method: "POST", body});
+            if (response.ok) {
+                this.username = username;
+                this.password = password;
+                this.database = database;
+                return {success: true, message: "Credentials are valid"};
+            }
+        } catch (e) {
+            console.error(e);
+            return {message: e, success: false};
         }
-        return false;
     }
 
 }
