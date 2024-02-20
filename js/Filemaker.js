@@ -482,7 +482,7 @@ export default class Filemaker {
      */
     async validateCredentials(username, password, database) {
         if (username === "" || password === "" || database === "") throw new Error("Username, password, and database are required fields");
-        const body = JSON.stringify({username, password, database});
+        const body = JSON.stringify({username: username, password: password, database: database});
         try {
 
             const response = await fetch(`${this.url}/credentials`, {method: "POST", body});
