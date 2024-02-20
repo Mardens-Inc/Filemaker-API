@@ -485,7 +485,7 @@ export default class Filemaker {
         const body = JSON.stringify({username: username, password: password, database: database});
         try {
 
-            const response = await fetch(`${this.url}/credentials`, {method: "POST", body});
+            const response = await fetch(`${this.url}/credentials`, {method: "POST", body: body, headers: {"Content-Type": "application/json", "accept": "application/json"}});
             if (response.ok) {
                 this.username = username;
                 this.password = password;
