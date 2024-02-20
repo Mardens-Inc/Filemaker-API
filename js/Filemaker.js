@@ -483,7 +483,7 @@ export default class Filemaker {
     async validateCredentials(username, password, database) {
         if (username === "" || password === "" || database === "") throw new Error("Username, password, and database are required fields");
         const body = JSON.stringify({username, password, database});
-        const response = await fetch(`${this.url}/fmutil/credentials`, {method: "POST", body});
+        const response = await fetch(`${this.url}/credentials`, {method: "POST", body});
         if (response.ok) {
             this.username = username;
             this.password = password;
