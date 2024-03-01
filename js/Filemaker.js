@@ -316,6 +316,34 @@ export default class Filemaker {
     }
 
     /**
+     * Retrieves the count of records in the specified database and layout.
+     *
+     * @throws {Error} Required fields are not set. Please set the username, password, database, and layout before making a request.
+     * @throws {Error} Failed to fetch records
+     *
+     * @return {Promise<number>} The count of records.
+     */
+    async getRecordCount(){
+        if (this.username === "" && this.password === "" && this.database === "" && this.layout === "") {
+            throw new Error("Required fields are not set. Please set the username, password, database, and layout before making a request.");
+        }
+
+        // Set the accept headers to only accept json responses.
+        const headers = new Headers();
+        headers.set("Accept", "application/json");
+        headers.set("X-Authentication-Options", JSON.stringify({username: this.username, password: this.password}));
+
+        try {
+            const response = await fetch(`${this.url}/databases/${this.database}/layouts/${this.layout}/records/count`, {headers});
+            let json = await response.json();
+            return json.count;
+        } catch (e) {
+            console.error(e);
+            throw new Error("Failed to fetch records");
+        }
+    }
+
+    /**
      * Retrieves rows from the specified database and layout.
      *
      * @async
