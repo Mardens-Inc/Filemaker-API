@@ -491,6 +491,8 @@ export default class Filemaker {
                 this.password = password;
                 this.database = database;
                 return {success: true, message: "Credentials are valid"};
+            }else{
+                return {success: false, message: "Invalid credentials"};
             }
         } catch (e) {
             console.error(e);
