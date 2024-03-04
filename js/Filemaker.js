@@ -189,8 +189,8 @@ export default class Filemaker {
 
 
         try {
-            const body = JSON.stringify({fields, sort, ascending});
-            const response = await fetch(`${this.url}/databases/${this.database}/layouts/${this.layout}/search`, {headers, method: "POST", body});
+            const body = JSON.stringify({fields: fields, sort: sort, ascending: ascending});
+            const response = await fetch(`${this.url}/databases/${this.database}/layouts/${this.layout}/search`, {headers, method: "POST", body: body});
             let json = await response.json();
             let records = [];
             for (let record of json) {
