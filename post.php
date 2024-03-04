@@ -114,7 +114,7 @@ $app->post("/databases/{database}/layouts/{layout}/search", function (Request $r
     $body = $request->getParsedBody();
     $fields = $body["fields"] ?? [];
     $sort = $body["sort"] ?? [];
-    $ascending = @$body["sort"] ?? true;
+    $ascending = @$body["ascending"] ?? true;
     $records = $fm->advancedSearch($fields, $sort, $ascending);
 
 
