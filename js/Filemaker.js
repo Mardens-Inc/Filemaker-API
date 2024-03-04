@@ -182,27 +182,31 @@ export default class Filemaker {
             throw new Error("Required fields are not set. Please set the username, password, database, and layout before making a request.");
         }
 
-        // Set the accept headers to only accept json responses.
-        const headers = new Headers();
-        headers.set("Accept", "application/json");
-        headers.set("X-Authentication-Options", JSON.stringify({username: this.username, password: this.password}));
-
-
         try {
-            const body = JSON.stringify({fields: fields, sort: sort, ascending: ascending});
-            const url = `${this.url}/databases/${this.database}/layouts/${this.layout}/search`;
-            const data = {headers: headers, method: "POST", body: body}
-            const response = await fetch(url, data);
-            let json = await response.json();
-            let records = [];
-            for (let record of json) {
-                records.push(FilemakerRecord.fromJSON(record));
-            }
-            return records;
+            const myHeaders = new Headers();
+            myHeaders.append("X-Authentication-Options", `{"username": "${this.username}",    "password": "${this.password}" }`);
+            myHeaders.append("Accept", "application/json");
+            myHeaders.append("Content-Type", "application/json");
+
+            const raw = JSON.stringify({fields: fields, sort: sort, ascending: ascending});
+
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow",
+            };
+
+            const response = await fetch(`${this.url}/databases/${this.database}/layouts/${this.layout}/search`, requestOptions);
+            const json = await response.json();
+            return json.map((record) => FilemakerRecord.fromJSON(record));
+
         } catch (e) {
             console.error(e);
             throw new Error("Failed to search for records");
         }
+
+
     }
 
     /**
@@ -325,7 +329,7 @@ export default class Filemaker {
      *
      * @return {Promise<number>} The count of records.
      */
-    async getRecordCount(){
+    async getRecordCount() {
         if (this.username === "" && this.password === "" && this.database === "" && this.layout === "") {
             throw new Error("Required fields are not set. Please set the username, password, database, and layout before making a request.");
         }
@@ -521,7 +525,7 @@ export default class Filemaker {
                 this.password = password;
                 this.database = database;
                 return {success: true, message: "Credentials are valid"};
-            }else{
+            } else {
                 return {success: false, message: "Invalid credentials"};
             }
         } catch (e) {
