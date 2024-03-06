@@ -81,7 +81,7 @@ $app->post("/databases/{database}/layouts/{layout}/records[/{id}]", function (Re
         }
     } else {
         // If there's no ID provided in the request then add a new record
-        $record = $fm->addRecord($fieldData);
+        $record = $fm->addRecord($data);
     }
 
     // Return the modified or created record in the response body
