@@ -54,14 +54,6 @@ $app->post("/databases/{database}/layouts/{layout}/records[/{id}]", function (Re
     // Parse the request body and query parameters
     $data = $request->getParsedBody();
     $params = $request->getQueryParams();
-
-//    // Decode the request data from JSON into an associative array
-//    // Handle potential decoding errors and respond with an error message
-//    try {
-//        $data = json_decode($data, true);
-//    } catch (Exception $e) {
-//    }
-
     // Create a new FileMaker instance using the provided authentication details
     $fm = new Filemaker($username, $password, $database, $layout);
     $id = @$args["id"] ?? null;
@@ -89,7 +81,7 @@ $app->post("/databases/{database}/layouts/{layout}/records[/{id}]", function (Re
         }
     } else {
         // If there's no ID provided in the request then add a new record
-        $record = $fm->addRecord($data);
+        $record = $fm->addRecord($fieldData);
     }
 
     // Return the modified or created record in the response body

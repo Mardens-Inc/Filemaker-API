@@ -46,6 +46,7 @@ class FileMaker
      */
     private static function getSessionToken(string $database, string $username, string $password): string
     {
+        $database = self::encodeParameter($database);
 
         if (FilemakerMemory::has($database)) {
             $token = FilemakerMemory::get($database);
