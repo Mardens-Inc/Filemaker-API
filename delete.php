@@ -59,7 +59,7 @@ $app->delete("/database/{database}", function (Request $request, Response $respo
     return $response->withStatus(200)->withHeader("Content-Type", "application/json");
 });
 
-$app->delete("/database/{database}/layout/{layout}/record", function (Request $request, Response $response, $args) {
+$app->delete("/databases/{database}/layouts/{layout}/records", function (Request $request, Response $response, $args) {
     $database = $args["database"];
     $layout = $args["layout"];
     // Parse the authentication headers from the request
@@ -89,7 +89,7 @@ $app->delete("/database/{database}/layout/{layout}/record", function (Request $r
     }
 });
 
-$app->delete("/database/{database}/layout/{layout}/record/{id}", function (Request $request, Response $response, $args) {
+$app->delete("/databases/{database}/layouts/{layout}/records/{id}", function (Request $request, Response $response, $args) {
     $database = $args["database"];
     $layout = $args["layout"];
     $id = $args["id"];
