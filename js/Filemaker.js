@@ -205,8 +205,6 @@ export default class Filemaker {
             console.error(e);
             throw new Error("Failed to search for records");
         }
-
-
     }
 
     /**
@@ -402,7 +400,7 @@ export default class Filemaker {
             const response = await fetch(`${this.url}/databases/${this.database}/layouts/${this.layout}/records/${id}?force-add=${addIfMissing}`, {
                 method: "POST",
                 headers,
-                body: JSON.stringify(record)
+                body: JSON.stringify(record["fields"])
             });
             let json = await response.json();
             return FilemakerRecord.fromJSON(json);
@@ -492,7 +490,7 @@ export default class Filemaker {
             const response = await fetch(`${this.url}/databases/${this.database}/layouts/${this.layout}/records`, {
                 method: "POST",
                 headers,
-                body: JSON.stringify(record)
+                body: JSON.stringify(record["fields"])
             });
             let json = await response.json();
             return FilemakerRecord.fromJSON(json);
