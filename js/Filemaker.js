@@ -17,6 +17,27 @@ export class FilemakerRecord {
     }
 
     /**
+     * Sets the value of a field in an object.
+     *
+     * @param {string} name - The name of the field to be set.
+     * @param {string|number} value - The value to assign to the field.
+     */
+    setField(name, value) {
+        this.fields[name] = value;
+    }
+
+    /**
+     * Retrieves the value of a field based on its name.
+     *
+     * @param {string} name - The name of the field.
+     * @return {string|number} - The value of the field.
+     */
+    getField(name) {
+        return this.fields[name];
+    }
+
+
+    /**
      * Creates a new FilemakerRecord object from a JSON representation.
      *
      * @param {Object} json - The JSON object representing the FilemakerRecord.
@@ -530,6 +551,42 @@ export default class Filemaker {
             console.error(e);
             return {message: e, success: false};
         }
+    }
+
+    /**
+     * Builds a table with the given items.
+     * @param {FilemakerRecord[]} items - An array of items to populate the table with.
+     * @param {string[]} [ignoredFields=[]] - An optional array of fields to ignore when populating the table.
+     * @returns {HTMLTableElement} - A table element populated with the items.
+     */
+    static buildTable(items, ignoredFields = []) {
+        const table = document.createElement("table");
+        const head = document.createElement("thead");
+        const body = document.createElement("tbody");
+        const rowNames = Object.keys(items[0].fields);
+        // Add the header row
+        const header = document.createElement("tr");
+        for (const row of rowNames) {
+            if (ignoredFields.includes(row)) continue;
+            const th = document.createElement("th");
+            th.textContent = row;
+            header.appendChild(th);
+        }
+        head.appendChild(header);
+        table.appendChild(head);
+        // Add the body rows
+        for (const record of items) {
+            const tr = document.createElement("tr");
+            for (const row of rowNames) {
+                if (ignoredFields.includes(row)) continue;
+                const td = document.createElement("td");
+                td.textContent = record.fields[row];
+                tr.appendChild(td);
+            }
+            body.appendChild(tr);
+        }
+        table.appendChild(body);
+        return table;
     }
 
 }
