@@ -33,7 +33,8 @@ Include an installation step here according to your package manager.
 
 ```javascript
 import Filemaker from 'Filemaker-JS-Library';
-
+// or
+import Filemaker from "https://cdn.jsdelivr.net/gh/Mardens-Inc/Filemaker-API/js/Filemaker.js";
 const filemaker = new Filemaker('url', 'username', 'password', 'database', 'layout');
 ```
 
